@@ -14,10 +14,11 @@ from keras import metrics
 from sklearn.model_selection import train_test_split
 
 
-
+hw = 60
 # data_dir = os.path.join(os.path.join(os.path.dirname(os.path.dirname(os.getcwd())), "media"), "model_relating_data")
 data_dir = os.path.join(settings.MEDIA_ROOT, "model_relating_data")
-def crop_center(img, size=156):
+def crop_center(img):
+    size = hw
     height, width = img.shape[0], img.shape[1]
     rh = int((height - size) / 2)
     rw = int((width - size) / 2)
@@ -49,8 +50,8 @@ def seek_suggest(enc, train_enc, X_train, train_name, similarity_func):
     name = train_name[bs]
     return suggest, name
 
-def autoencoder(size=(156, 156, 3)):
-    inp = Input(shape=size)
+def autoencoder():
+    inp = Input(shape=(hw, hw, 3))
     x = Conv2D(32, (3, 3), activation='relu', padding='same')(inp)
     x = MaxPooling2D((2, 2), padding='same')(x)
     x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
@@ -104,8 +105,8 @@ def autoencoder(size=(156, 156, 3)):
     autoencoder.add_loss(vae_loss)
     autoencoder.compile(optimizer='adam')
 
-    autoencoder.load_weights(os.path.join(data_dir, "my_first_weights_best.h5"))
-    encoder.load_weights(os.path.join(data_dir, "my_first_encoder_weights_best.h5"))
+    autoencoder.load_weights(os.path.join(data_dir, "my_first_weights{}.h5".format(hw)))
+    encoder.load_weights(os.path.join(data_dir, "my_first_encoder_weights{}.h5".format(hw)))
 
     # https://qiita.com/fukuit/items/2f8bdbd36979fff96b07
     # 0.66
@@ -113,8 +114,8 @@ def autoencoder(size=(156, 156, 3)):
 
 model, encoder = autoencoder()
 
-X_all = np.load(os.path.join(data_dir, "X_all.npy"))
-X_name = np.load(os.path.join(data_dir, "X_name.npy"))
+X_all = np.load(os.path.join(data_dir, "X_all{}.npy".format(hw)))
+X_name = np.load(os.path.join(data_dir, "X_name{}.npy".format(hw)))
 
 X_train, _, train_name, _ = train_test_split(X_all, X_name, random_state=42, test_size=0.05)
 X_train = X_train / 255.0
